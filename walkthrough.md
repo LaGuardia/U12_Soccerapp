@@ -4,6 +4,36 @@ A modern, premium, touch-friendly web application for 12U soccer coaches to mana
 
 ---
 
+## 📸 Visual Progress
+
+### Full App — Desktop Layout
+![Full app desktop view](docs/screenshot_main_view.png)
+
+*Three-column layout: left sidebar (period tracker + event log), center pitch, right sidebar (bench + roster table)*
+
+---
+
+### Tactical Pitch Close-up
+![Tactical pitch with player badges](docs/screenshot_pitch_closeup.png)
+
+*SVG-rendered emerald pitch with white field markings and player badges — gold for GK, blue for outfield*
+
+---
+
+### Match Period Tracker Panel
+![Match period tracker](docs/screenshot_period_tracker.png)
+
+*Period tracker showing Quarter 2/4 with "End Period & Accrue Time" button and formation selector*
+
+---
+
+### Equal Playing Time Table
+![Roster and play time stats table](docs/screenshot_stats_table.png)
+
+*Roster table sorted by least play time; amber ⚠ Sub In badge for players below the 50% threshold*
+
+---
+
 ## ✅ What Was Built
 
 ### 1. Tactical Pitch Visualizer
@@ -79,6 +109,7 @@ A live, timestamped log in the left sidebar records:
 U12_Soccerapp/
 ├── index.html          # Structural HTML, sidebar layout, field area, modal dialogs
 ├── README.md           # Project documentation
+├── docs/               # Screenshots and documentation images
 ├── css/
 │   └── style.css       # Design system: dark theme, glassmorphism, pitch overlay, animations, responsive layout
 └── js/

@@ -6,6 +6,22 @@ A modern, touch-friendly web application for **12U (9v9) soccer coaches** to man
 
 ---
 
+## 📸 Screenshots
+
+### Full App — Desktop View
+![Full app desktop view](docs/screenshot_main_view.png)
+
+### Tactical Pitch Close-up
+![Tactical pitch with player badges](docs/screenshot_pitch_closeup.png)
+
+### Match Period Tracker
+![Match period tracker panel](docs/screenshot_period_tracker.png)
+
+### Equal Playing Time Table
+![Roster and play time stats table](docs/screenshot_stats_table.png)
+
+---
+
 ## ✨ Features
 
 ### 🏟️ Tactical Pitch Visualizer
@@ -95,6 +111,7 @@ Then open **http://localhost:8080** in your browser.
 U12_Soccerapp/
 ├── index.html              # Main layout — pitch, sidebars, modals
 ├── README.md               # This file
+├── docs/                   # Screenshots and documentation images
 ├── css/
 │   └── style.css           # Full design system (dark theme, glassmorphism, animations)
 └── js/
