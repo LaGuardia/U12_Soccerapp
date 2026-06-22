@@ -63,9 +63,9 @@ export class PitchRenderer {
         <!-- Top Right -->
         <path d="M 94 3 A 3 3 0 0 0 97 6" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="0.6" />
         <!-- Bottom Left -->
-        <path d="M 3 124 A 3 3 0 0 0 6 127" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="0.6" />
+        <path d="M 3 124 A 3 3 0 0 1 6 127" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="0.6" />
         <!-- Bottom Right -->
-        <path d="M 97 124 A 3 3 0 0 1 94 127" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="0.6" />
+        <path d="M 97 124 A 3 3 0 0 0 94 127" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="0.6" />
       </svg>
     `;
   }
