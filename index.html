@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soccer Game Day Roster & Position Manager</title>
+  <meta name="description" content="A touch-friendly game day roster, tactical positions and equal-playtime manager for soccer coaches.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- LEFT SIDEBAR: MATCH CONTROLS & EVENT LOGS -->
+    <aside class="sidebar">
+      
+      <!-- Logo / Title -->
+      <header class="panel" style="padding: 15px 20px;">
+        <h1 id="app-title">📋 12U Coach Assistant</h1>
+        <p style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px;">Roster & equal-playtime tracker</p>
+      </header>
+
+      <!-- Timer Box -->
+      <section class="panel timer-widget" aria-labelledby="timer-title">
+        <h2 id="timer-title" class="panel-title">⏱ Game Clock</h2>
+        <div class="timer-box">
+          <div id="timer-display" class="timer-display">00:00</div>
+          <div id="period-display" class="period-display">Quarter 1/4</div>
+        </div>
+        <div class="timer-controls">
+          <button id="btn-play-pause" class="btn btn-primary" title="Start or Pause game clock">
+            <span>▶</span> Start
+          </button>
+          <button id="btn-reset-clock" class="btn btn-secondary" title="Reset clock and match statistics">
+            <span>↺</span> Reset
+          </button>
+        </div>
+      </section>
+
+      <!-- Strategy & Tactics -->
+      <section class="panel" aria-labelledby="tactics-title">
+        <h2 id="tactics-title" class="panel-title">⚙ Tactical Formation</h2>
+        <div class="form-group" style="margin-top: 10px;">
+          <label for="formation-select">Select Formation (9v9)</label>
+          <select id="formation-select" class="form-input">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+      </section>
+
+      <!-- Event Logs -->
+      <section class="panel events-panel" aria-labelledby="events-title" style="flex: 1;">
+        <div class="panel-header">
+          <h2 id="events-title" class="panel-title">📝 Match Events</h2>
+        </div>
+        <div class="events-log-container">
+          <ul id="events-log-list" class="events-log-list">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+      </section>
+      
+    </aside>
+
+    <!-- CENTER AREA: SOCCER PITCH FIELD -->
+    <main class="panel pitch-panel" aria-labelledby="pitch-title">
+      <div class="pitch-header">
+        <h2 id="pitch-title" class="panel-title">⚽ Active Field Positions</h2>
+        <button id="btn-clear-field" class="btn btn-secondary small-btn" title="Bench all active players">
+          Bench All ✕
+        </button>
+      </div>
+      
+      <!-- Visual Field Viewport -->
+      <div class="pitch-viewport">
+        <!-- SVG soccer field markings overlay -->
+        <div id="pitch-background" class="pitch-background"></div>
+        <!-- Active drop position badges -->
+        <div id="pitch-positions-container" class="pitch-positions-container"></div>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDEBAR: ROSTER, BENCH & PLAYING TIMES -->
+    <aside class="sidebar">
+
+      <!-- Bench Drop Zone -->
+      <section class="panel" style="max-height: 350px; display: flex; flex-direction: column;" aria-labelledby="bench-title">
+        <div class="panel-header">
+          <h2 id="bench-title" class="panel-title">👥 Bench / Substitutes</h2>
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Drag players from here</span>
+        </div>
+        <div id="bench-container" class="bench-drop-zone drop-zone" data-position-id="bench">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- Playing Times Stats Table -->
+      <section class="panel stats-panel" aria-labelledby="stats-title">
+        <div class="panel-header">
+          <h2 id="stats-title" class="panel-title">📊 Roster & Play Time</h2>
+          <button id="btn-add-player-trigger" class="btn btn-primary small-btn" title="Add new player to roster">
+            ➕ Add
+          </button>
+        </div>
+        <div class="stats-table-wrapper">
+          <table class="stats-table" aria-label="Player playing time and stats">
+            <thead>
+              <tr>
+                <th scope="col">No.</th>
+                <th scope="col">Player</th>
+                <th scope="col">Pos</th>
+                <th scope="col">Status</th>
+                <th scope="col">Minutes</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody id="stats-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Database Maintenance and Settings -->
+      <section class="panel" style="padding: 12px 20px;" aria-labelledby="settings-title">
+        <h2 id="settings-title" class="panel-title">🔧 Admin Settings</h2>
+        <div class="settings-actions">
+          <button id="btn-match-settings-trigger" class="btn btn-secondary small-btn" title="Configure periods and minutes">⏱ Period Config</button>
+          <button id="btn-reset-stats" class="btn btn-secondary small-btn" title="Reset play time tracker only">Reset Playtimes</button>
+          <button id="btn-export-roster" class="btn btn-secondary small-btn" title="Download backup of current roster">Backup Roster</button>
+          <button id="btn-import-roster" class="btn btn-secondary small-btn" title="Import a saved roster JSON file">Restore Roster</button>
+        </div>
+        <div style="margin-top: 8px; text-align: center;">
+          <button id="btn-reset-defaults" class="btn btn-danger small-btn" style="width: 100%; opacity: 0.6;" title="Reset database back to the 12 original players">
+            Reset Database to Demo Defaults
+          </button>
+        </div>
+        <!-- Hidden file input for import -->
+        <input type="file" id="file-import-input" accept=".json" style="display: none;">
+      </section>
+
+    </aside>
+
+  </div>
+
+  <!-- --- DIALOG MODALS --- -->
+
+  <!-- Add Player Modal -->
+  <div id="add-player-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="add-modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="add-modal-title" class="modal-title">Create Player</h3>
+        <button id="close-add-modal" class="modal-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="form-add-player">
+        <div class="form-group">
+          <label for="add-player-name">Player Name</label>
+          <input type="text" id="add-player-name" class="form-input" placeholder="e.g. Liam Johnson" required>
+        </div>
+        <div class="form-group">
+          <label for="add-player-number">Jersey Number</label>
+          <input type="number" id="add-player-number" class="form-input" min="0" max="99" placeholder="e.g. 10" required>
+        </div>
+        <div class="form-group">
+          <label for="add-player-pos">Preferred Playing Zone</label>
+          <select id="add-player-pos" class="form-input">
+            <option value="GK">Goalkeeper (GK)</option>
+            <option value="DF">Defender (DF)</option>
+            <option value="MF" selected>Midfielder (MF)</option>
+            <option value="FW">Forward (FW)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">Save Player</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Player Modal -->
+  <div id="edit-player-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="edit-modal-title" class="modal-title">Edit Player Profile</h3>
+        <button id="close-edit-modal" class="modal-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="form-edit-player">
+        <input type="hidden" id="edit-player-id">
+        <div class="form-group">
+          <label for="edit-player-name">Player Name</label>
+          <input type="text" id="edit-player-name" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-player-number">Jersey Number</label>
+          <input type="number" id="edit-player-number" class="form-input" min="0" max="99" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-player-pos">Preferred Playing Zone</label>
+          <select id="edit-player-pos" class="form-input">
+            <option value="GK">Goalkeeper (GK)</option>
+            <option value="DF">Defender (DF)</option>
+            <option value="MF">Midfielder (MF)</option>
+            <option value="FW">Forward (FW)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </div>
+      </form>
+      <div class="delete-action-container">
+        <button id="btn-delete-player" class="btn btn-danger small-btn" style="width: 100%;">
+          Remove Player from Roster
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Period Settings Modal -->
+  <div id="match-settings-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="settings-modal-title" class="modal-title">Match Time Settings</h3>
+        <button id="close-settings-modal" class="modal-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <form id="form-match-settings">
+        <div class="form-group">
+          <label for="settings-period-type">Period Format</label>
+          <select id="settings-period-type" class="form-input">
+            <option value="quarters">4 Quarters (Standard 12U)</option>
+            <option value="halves">2 Halves</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="settings-period-length">Period Length (Minutes)</label>
+          <input type="number" id="settings-period-length" class="form-input" min="1" max="90" value="15" required>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary">Apply & Reset Clock</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Application Logic Bundle -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
