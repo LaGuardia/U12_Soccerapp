@@ -20,19 +20,20 @@
         <p style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px;">Roster & equal-playtime tracker</p>
       </header>
 
-      <!-- Timer Box -->
+      <!-- Period Tracker Box -->
       <section class="panel timer-widget" aria-labelledby="timer-title">
-        <h2 id="timer-title" class="panel-title">⏱ Game Clock</h2>
-        <div class="timer-box">
-          <div id="timer-display" class="timer-display">00:00</div>
-          <div id="period-display" class="period-display">Quarter 1/4</div>
+        <h2 id="timer-title" class="panel-title">⏱ Match Period</h2>
+        <div class="timer-box" style="margin-bottom: 10px;">
+          <div id="period-display" class="timer-display" style="font-size: 1.8rem; padding: 5px 0;">Quarter 1/4</div>
         </div>
         <div class="timer-controls">
-          <button id="btn-play-pause" class="btn btn-primary" title="Start or Pause game clock">
-            <span>▶</span> Start
+          <button id="btn-advance-period" class="btn btn-primary" style="width: 100%;" title="End current period and accrue minutes for field players">
+            <span>➡️</span> End Period & Accrue Time
           </button>
-          <button id="btn-reset-clock" class="btn btn-secondary" title="Reset clock and match statistics">
-            <span>↺</span> Reset
+        </div>
+        <div style="margin-top: 8px;">
+          <button id="btn-reset-clock" class="btn btn-secondary small-btn" style="width: 100%;" title="Reset match periods and play statistics">
+            <span>↺</span> Reset Match
           </button>
         </div>
       </section>

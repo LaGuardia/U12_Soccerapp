@@ -1,13 +1,10 @@
-// Match Timer and Event Logging module.
-// Manages play clock, dynamic time played accumulation, and game events logger.
+// Match Period and Event Logging module.
+// Manages quarters/halves and static playing time accumulation (per period).
 
 export class MatchTimer {
   constructor(rosterManager, onTickCallback) {
     this.rosterManager = rosterManager;
-    this.onTickCallback = onTickCallback; // Callback for UI updates on each tick
-    this.elapsedSeconds = 0;
-    this.isRunning = false;
-    this.intervalId = null;
+    this.onTickCallback = onTickCallback; // Callback for UI updates
     
     // Default match configurations
     this.config = {
@@ -18,6 +15,7 @@ export class MatchTimer {
     
     this.currentPeriod = 1;
     this.events = [];
+    this.isMatchFinished = false;
     this.loadTimerState();
   }
 
@@ -26,10 +24,10 @@ export class MatchTimer {
     if (saved) {
       try {
         const state = JSON.parse(saved);
-        this.elapsedSeconds = state.elapsedSeconds || 0;
         this.currentPeriod = state.currentPeriod || 1;
         this.config = state.config || this.config;
         this.events = state.events || [];
+        this.isMatchFinished = state.isMatchFinished || false;
       } catch (e) {
         console.error("Error loading timer state", e);
       }
@@ -38,96 +36,60 @@ export class MatchTimer {
 
   saveTimerState() {
     const state = {
-      elapsedSeconds: this.elapsedSeconds,
       currentPeriod: this.currentPeriod,
       config: this.config,
-      events: this.events
+      events: this.events,
+      isMatchFinished: this.isMatchFinished
     };
     localStorage.setItem('soccer_coach_timer_state', JSON.stringify(state));
   }
 
-  start() {
-    if (this.isRunning) return;
-    this.isRunning = true;
-    this.intervalId = setInterval(() => this.tick(), 1000);
-    this.logEvent("Match resumed");
-  }
+  advancePeriod() {
+    if (this.isMatchFinished) return;
 
-  stop() {
-    if (!this.isRunning) return;
-    this.isRunning = false;
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
-    this.logEvent("Match paused");
-    this.saveTimerState();
-  }
-
-  reset() {
-    this.stop();
-    this.elapsedSeconds = 0;
-    this.currentPeriod = 1;
-    this.events = [];
-    this.saveTimerState();
-    this.logEvent("Match clock reset");
-    if (this.onTickCallback) this.onTickCallback();
-  }
-
-  tick() {
-    this.elapsedSeconds++;
+    const periodLabel = this.getPeriodSingleLabel();
     
-    // Accumulate playing time for all players currently on the pitch
+    // Accumulate playing time for all players currently on the pitch for the full period length
+    const secondsInPeriod = this.config.periodLengthMinutes * 60;
     const players = this.rosterManager.getPlayers();
     players.forEach(p => {
       if (p.position !== null) {
-        p.timePlayed = (p.timePlayed || 0) + 1;
+        p.timePlayed = (p.timePlayed || 0) + secondsInPeriod;
       }
     });
-    
-    // Auto-save roster so minutes are saved in real-time
+
     this.rosterManager.saveRoster();
-    this.saveTimerState();
-    
-    // Check if period ended
-    const limit = this.config.periodLengthMinutes * 60;
-    if (this.elapsedSeconds >= limit) {
-      this.handlePeriodEnd();
+    this.logEvent(`${periodLabel} completed - Play time accrued`);
+
+    if (this.currentPeriod < this.config.totalPeriods) {
+      this.currentPeriod++;
+      this.logEvent(`Moved to ${this.getPeriodSingleLabel()}`);
+    } else {
+      this.isMatchFinished = true;
+      this.logEvent("Match finished!");
     }
+    
+    this.saveTimerState();
     
     if (this.onTickCallback) {
       this.onTickCallback();
     }
   }
 
-  handlePeriodEnd() {
-    this.stop();
-    const periodLabel = this.config.periodType === 'quarters' 
-      ? `Quarter ${this.currentPeriod}` 
-      : `Half ${this.currentPeriod}`;
-    
-    this.logEvent(`${periodLabel} completed`);
-    
-    if (this.currentPeriod < this.config.totalPeriods) {
-      // Prompt user or simply log next period ready
-      this.currentPeriod++;
-      this.elapsedSeconds = 0;
-      this.logEvent(`Ready for period ${this.currentPeriod}`);
-    } else {
-      this.logEvent("Match finished!");
-    }
+  reset() {
+    this.currentPeriod = 1;
+    this.isMatchFinished = false;
+    this.events = [];
     this.saveTimerState();
+    this.logEvent("Match stats reset");
+    if (this.onTickCallback) this.onTickCallback();
   }
 
   logEvent(description) {
-    const timestamp = this.getFormattedTime();
-    const periodLabel = this.config.periodType === 'quarters' 
-      ? `Q${this.currentPeriod}` 
-      : `H${this.currentPeriod}`;
-    
+    const periodLabel = this.getPeriodSingleLabel();
     const event = {
       id: 'ev_' + Date.now() + '_' + Math.random(),
-      timestamp,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       period: periodLabel,
       description
     };
@@ -154,19 +116,20 @@ export class MatchTimer {
     this.logEvent(msg);
   }
 
-  getFormattedTime() {
-    const mins = Math.floor(this.elapsedSeconds / 60);
-    const secs = this.elapsedSeconds % 60;
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  getPeriodSingleLabel() {
+    const label = this.config.periodType === 'quarters' ? 'Quarter' : 'Half';
+    return `${label} ${this.currentPeriod}`;
   }
 
   getPeriodLabel() {
+    if (this.isMatchFinished) {
+      return "Match Finished";
+    }
     const label = this.config.periodType === 'quarters' ? 'Quarter' : 'Half';
     return `${label} ${this.currentPeriod}/${this.config.totalPeriods}`;
   }
 
   configureMatch(periodType, lengthMinutes) {
-    this.stop();
     this.config.periodType = periodType;
     this.config.periodLengthMinutes = parseInt(lengthMinutes) || 15;
     this.config.totalPeriods = periodType === 'quarters' ? 4 : 2;

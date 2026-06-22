@@ -16,9 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     benchContainer: document.getElementById('bench-container'),
     
     // Timer Controls
-    timerDisplay: document.getElementById('timer-display'),
     periodDisplay: document.getElementById('period-display'),
-    btnPlayPause: document.getElementById('btn-play-pause'),
+    btnAdvancePeriod: document.getElementById('btn-advance-period'),
     btnResetClock: document.getElementById('btn-reset-clock'),
     
     // Config / Strategy Controls
@@ -99,15 +98,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sync Timer Controls Visuals
   function updateTimerUI() {
-    DOM.timerDisplay.textContent = matchTimer.getFormattedTime();
     DOM.periodDisplay.textContent = matchTimer.getPeriodLabel();
     
-    if (matchTimer.isRunning) {
-      DOM.btnPlayPause.innerHTML = '<span>⏸</span> Pause';
-      DOM.btnPlayPause.classList.add('timer-running');
+    if (matchTimer.isMatchFinished) {
+      DOM.btnAdvancePeriod.disabled = true;
+      DOM.btnAdvancePeriod.innerHTML = '<span>🏁</span> Match Finished';
+      DOM.btnAdvancePeriod.classList.remove('btn-primary');
+      DOM.btnAdvancePeriod.classList.add('btn-secondary');
     } else {
-      DOM.btnPlayPause.innerHTML = '<span>▶</span> Start';
-      DOM.btnPlayPause.classList.remove('timer-running');
+      DOM.btnAdvancePeriod.disabled = false;
+      DOM.btnAdvancePeriod.innerHTML = '<span>➡️</span> End Period & Accrue Time';
+      DOM.btnAdvancePeriod.classList.add('btn-primary');
+      DOM.btnAdvancePeriod.classList.remove('btn-secondary');
     }
   }
 
@@ -139,13 +141,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Calculate details for equal play warnings
     // Assume typical target is average play time, or highlight players with < 50% play time
-    const totalMatchTime = matchTimer.elapsedSeconds; // current timer count
+    const completedPeriods = matchTimer.isMatchFinished 
+      ? matchTimer.config.totalPeriods 
+      : (matchTimer.currentPeriod - 1);
+    const totalMatchTime = completedPeriods * matchTimer.config.periodLengthMinutes * 60;
     const benchmark = Math.max(1, totalMatchTime * 0.5); // 50% target warning
 
     players.forEach(player => {
       const mins = Math.floor((player.timePlayed || 0) / 60);
-      const secs = (player.timePlayed || 0) % 60;
-      const formattedPlayTime = `${mins}m ${secs}s`;
+      const formattedPlayTime = `${mins}m`;
 
       const tr = document.createElement('tr');
       
@@ -214,17 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Event Wireups ---
 
   // Timer controls
-  DOM.btnPlayPause.addEventListener('click', () => {
-    if (matchTimer.isRunning) {
-      matchTimer.stop();
-    } else {
-      matchTimer.start();
+  DOM.btnAdvancePeriod.addEventListener('click', () => {
+    if (confirm(`End the current ${matchTimer.config.periodType === 'quarters' ? 'Quarter' : 'Half'}? This will accrue playtime for all active players on the field.`)) {
+      matchTimer.advancePeriod();
     }
-    updateTimerUI();
   });
 
   DOM.btnResetClock.addEventListener('click', () => {
-    if (confirm("Are you sure you want to reset the match clock and stats? All substitution records and logged events will be cleared.")) {
+    if (confirm("Are you sure you want to reset the match period and stats? All substitution records and logged events will be cleared.")) {
       matchTimer.reset();
       rosterManager.resetPlayingTimes();
       pitchRenderer.render();
