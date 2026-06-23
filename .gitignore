@@ -8,3 +8,8 @@ Thumbs.db
 .gemini/
 *.log
 *.tmp
+
+# Python virtual environment
+.venv/
+venv/
+
