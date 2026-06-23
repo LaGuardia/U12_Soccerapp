@@ -1036,3 +1036,130 @@ select.form-input {
     font-size: 0.85rem;
   }
 }
+
+/* --- SEASON & GAME ARCHIVE MODALS --- */
+.large-modal {
+  max-width: 850px;
+  width: 90%;
+}
+
+.medium-modal {
+  max-width: 650px;
+  width: 90%;
+}
+
+/* Tabs */
+.season-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.season-tab {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.season-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.season-tab.active {
+  color: var(--primary);
+  background: var(--primary-glow);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Tab contents */
+.season-tab-content {
+  display: none;
+}
+
+.season-tab-content.active-content {
+  display: block;
+}
+
+/* Match History List */
+.match-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-history-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all var(--transition-fast);
+}
+
+.match-history-item:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(148, 163, 184, 0.3);
+  transform: translateY(-1px);
+}
+
+.match-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.match-item-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.match-item-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.match-item-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--primary);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.match-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Details summary block */
+.match-details-summary {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 20px;
+  margin-bottom: 15px;
+}
+
+/* Scrollable container for details events */
+.events-log-container::-webkit-scrollbar {
+  width: 4px;
+}
+

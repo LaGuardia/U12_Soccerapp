@@ -60,6 +60,12 @@ A modern, touch-friendly web application for **12U (9v9) soccer coaches** to man
 - Automatically logs every substitution, formation change, period end, and roster action
 - Tagged with the current period label (Q1, Q2, H1, etc.) and wall-clock time
 
+### 🏆 Season History & Playtime Archiving
+- Save and archive completed matches to local database with opponent names and scores
+- Track cumulative season stats (Matches Played, Total Minutes, Average Minutes/Match)
+- Monitor season-wide **Equal Playtime Percentage** for every player to ensure fair play
+- Inspect past game details (logs and player minutes) or delete matches from history
+
 ### 🔄 Tactical Formations (9v9)
 | Formation | Description |
 |-----------|-------------|
@@ -101,7 +107,8 @@ Then open **http://localhost:8080** in your browser.
 2. **During the game** — Drag players to make substitutions. The event log records every move automatically.
 3. **End of each period** — Click **"End Period & Accrue Time"**. Playing minutes are credited to every player currently on the field.
 4. **Check the table** — Sort by play time to see who needs minutes. Players with a ⚠ tag are under the 50% threshold.
-5. **After the match** — Use "Backup Roster" to export your roster JSON for next time.
+5. **After the match** — Click **"Save Match to Season"** to archive the game details and reset stats. Use **"Season History & Stats"** in Admin Settings to track season-long stats.
+6. **Backup Roster** — Use "Backup Roster" to export your roster JSON for safe keeping.
 
 ---
 
@@ -120,7 +127,8 @@ U12_Soccerapp/
     ├── roster.js           # Player CRUD, localStorage persistence, position sync
     ├── timer.js            # Match period tracker & playtime accrual engine
     ├── dragdrop.js         # Custom Pointer Event drag-and-drop controller
-    └── pitch.js            # SVG pitch rendering & player badge creation
+    ├── pitch.js            # SVG pitch rendering & player badge creation
+    └── season.js           # SeasonManager — archives matches and aggregates season stats
 ```
 
 ---

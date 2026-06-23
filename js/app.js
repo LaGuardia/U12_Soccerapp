@@ -6,6 +6,7 @@ import { MatchTimer } from './timer.js';
 import { DragDropController } from './dragdrop.js';
 import { PitchRenderer } from './pitch.js';
 import { FORMATIONS } from './formations.js';
+import { SeasonManager } from './season.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // DOM References
@@ -55,11 +56,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // Backup & Restore
     btnExportRoster: document.getElementById('btn-export-roster'),
     btnImportRoster: document.getElementById('btn-import-roster'),
-    fileImportInput: document.getElementById('file-import-input')
+    fileImportInput: document.getElementById('file-import-input'),
+
+    // Save Game Modals & Buttons
+    btnSaveMatch: document.getElementById('btn-save-match'),
+    saveMatchContainer: document.getElementById('save-match-container'),
+    saveMatchModal: document.getElementById('save-match-modal'),
+    closeSaveMatchModal: document.getElementById('close-save-match-modal'),
+    formSaveMatch: document.getElementById('form-save-match'),
+
+    // Season Modal & Controls
+    btnSeasonTrigger: document.getElementById('btn-season-trigger'),
+    seasonModal: document.getElementById('season-modal'),
+    closeSeasonModal: document.getElementById('close-season-modal'),
+    tabSeasonStats: document.getElementById('tab-season-stats'),
+    tabMatchHistory: document.getElementById('tab-match-history'),
+    tabContentStats: document.getElementById('tab-content-stats'),
+    tabContentHistory: document.getElementById('tab-content-history'),
+    seasonStatsBody: document.getElementById('season-stats-body'),
+    matchHistoryList: document.getElementById('match-history-list'),
+
+    // Match Archive Details Modal
+    matchDetailsModal: document.getElementById('match-details-modal'),
+    closeDetailsModal: document.getElementById('close-details-modal'),
+    detailOpponent: document.getElementById('detail-opponent'),
+    detailMeta: document.getElementById('detail-meta'),
+    detailPlaytimesBody: document.getElementById('detail-playtimes-body'),
+    detailEventsList: document.getElementById('detail-events-list')
   };
 
   // 1. Initialize Roster Manager
   const rosterManager = new RosterManager();
+
+  // 1b. Initialize Season Manager
+  const seasonManager = new SeasonManager();
 
   // 2. Initialize Match Timer
   const matchTimer = new MatchTimer(rosterManager, () => {
@@ -110,6 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
       DOM.btnAdvancePeriod.innerHTML = '<span>➡️</span> End Period & Accrue Time';
       DOM.btnAdvancePeriod.classList.add('btn-primary');
       DOM.btnAdvancePeriod.classList.remove('btn-secondary');
+    }
+
+    // Toggle save button container based on playtime accrued
+    const hasPlaytime = rosterManager.getPlayers().some(p => p.timePlayed > 0);
+    if (hasPlaytime) {
+      DOM.saveMatchContainer.style.display = 'block';
+    } else {
+      DOM.saveMatchContainer.style.display = 'none';
     }
   }
 
@@ -210,9 +248,136 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.addPlayerModal.classList.remove('modal-active');
     DOM.editPlayerModal.classList.remove('modal-active');
     DOM.matchSettingsModal.classList.remove('modal-active');
+    DOM.saveMatchModal.classList.remove('modal-active');
+    DOM.seasonModal.classList.remove('modal-active');
+    DOM.matchDetailsModal.classList.remove('modal-active');
     
     // Reset forms
     DOM.formAddPlayer.reset();
+    DOM.formSaveMatch.reset();
+  }
+
+  // Populate cumulative season statistics tab
+  function renderSeasonStats() {
+    DOM.seasonStatsBody.innerHTML = '';
+    const stats = seasonManager.getSeasonStats(rosterManager.getPlayers());
+
+    if (stats.length === 0) {
+      DOM.seasonStatsBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No player records found.</td></tr>';
+      return;
+    }
+
+    // Sort players numerically by jersey number
+    stats.sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+    stats.forEach(stat => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong class="jersey-pill">${stat.number}</strong></td>
+        <td><strong>${stat.name}</strong> ${!stat.isCurrentRoster ? '<span style="font-size: 0.6rem; color: var(--text-muted);">(Former)</span>' : ''}</td>
+        <td><span class="pos-pill">${stat.preferredPosition}</span></td>
+        <td>${stat.matchesPlayed}</td>
+        <td><span class="playtime-counter">${stat.totalMinutes}m</span></td>
+        <td>${stat.avgMinutes}m</td>
+        <td>
+          <span style="font-weight: 700; color: ${stat.equalPlayPercent >= 50 ? 'var(--primary)' : 'var(--yellow)'};">
+            ${stat.equalPlayPercent}%
+          </span>
+        </td>
+      `;
+      DOM.seasonStatsBody.appendChild(tr);
+    });
+  }
+
+  // Populate historical matches list tab
+  function renderMatchHistory() {
+    DOM.matchHistoryList.innerHTML = '';
+    const games = seasonManager.getGames();
+
+    if (games.length === 0) {
+      DOM.matchHistoryList.innerHTML = '<div class="empty-log-message" style="padding: 30px 0;">No matches archived in history yet. Close a match and save it to build history!</div>';
+      return;
+    }
+
+    games.forEach(game => {
+      const item = document.createElement('div');
+      item.classList.add('match-history-item');
+
+      const dateStr = new Date(game.date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+      const formatStr = `${game.totalPeriods} ${game.periodType === 'quarters' ? 'Quarters' : 'Halves'} • ${game.periodLengthMinutes}m`;
+
+      item.innerHTML = `
+        <div class="match-item-info">
+          <div class="match-item-title">vs. ${game.opponent}</div>
+          <div class="match-item-meta">${dateStr} • ${formatStr}</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <div class="match-item-score">${game.score}</div>
+          <div class="match-item-actions">
+            <button class="btn btn-secondary small-btn btn-view-details" data-game-id="${game.id}">Details</button>
+            <button class="btn btn-danger small-btn btn-delete-match" style="padding: 6px 8px;" data-game-id="${game.id}" title="Delete Match">🗑</button>
+          </div>
+        </div>
+      `;
+
+      // Details listener
+      item.querySelector('.btn-view-details').addEventListener('click', () => {
+        renderMatchDetails(game);
+      });
+
+      // Delete listener
+      item.querySelector('.btn-delete-match').addEventListener('click', () => {
+        if (confirm(`Delete the match record vs. ${game.opponent} from season history? This cannot be undone.`)) {
+          seasonManager.deleteGame(game.id);
+          renderMatchHistory();
+          renderSeasonStats();
+        }
+      });
+
+      DOM.matchHistoryList.appendChild(item);
+    });
+  }
+
+  // Populate match archive details view modal
+  function renderMatchDetails(game) {
+    DOM.detailOpponent.textContent = `vs. ${game.opponent}`;
+    const dateStr = new Date(game.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    DOM.detailMeta.textContent = `${dateStr} • ${game.totalPeriods} ${game.periodType === 'quarters' ? 'Quarters' : 'Halves'} (${game.periodLengthMinutes} min each)`;
+
+    // Render details playtime table
+    DOM.detailPlaytimesBody.innerHTML = '';
+    const stats = [...game.playerStats];
+    stats.sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+    stats.forEach(stat => {
+      const tr = document.createElement('tr');
+      const mins = Math.floor(stat.timePlayed / 60);
+      tr.innerHTML = `
+        <td><strong class="jersey-pill">${stat.number}</strong></td>
+        <td>${stat.name}</td>
+        <td><span class="pos-pill">${stat.preferredPosition}</span></td>
+        <td><span class="playtime-counter">${mins}m</span></td>
+      `;
+      DOM.detailPlaytimesBody.appendChild(tr);
+    });
+
+    // Render details log
+    DOM.detailEventsList.innerHTML = '';
+    if (!game.events || game.events.length === 0) {
+      DOM.detailEventsList.innerHTML = '<li class="empty-log-message">No logged events for this match.</li>';
+    } else {
+      game.events.forEach(evt => {
+        const li = document.createElement('li');
+        li.classList.add('event-log-item');
+        li.innerHTML = `
+          <span class="event-meta">[${evt.period} - ${evt.timestamp}]</span>
+          <span class="event-desc">${evt.description}</span>
+        `;
+        DOM.detailEventsList.appendChild(li);
+      });
+    }
+
+    DOM.matchDetailsModal.classList.add('modal-active');
   }
 
   // --- Event Wireups ---
@@ -424,6 +589,69 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     reader.readAsText(file);
     DOM.fileImportInput.value = ''; // Reset input
+  });
+
+  // Wire new season and match saving triggers
+  DOM.btnSaveMatch.addEventListener('click', () => {
+    DOM.saveMatchModal.classList.add('modal-active');
+  });
+
+  DOM.closeSaveMatchModal.addEventListener('click', closeModals);
+  DOM.formSaveMatch.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const opponent = document.getElementById('save-opponent-name').value;
+    const score = document.getElementById('save-match-score').value;
+
+    const rosterPlayers = rosterManager.getPlayers();
+    
+    // Save to season
+    seasonManager.saveGame(
+      opponent,
+      score,
+      matchTimer.config,
+      rosterPlayers,
+      matchTimer.events
+    );
+
+    // Reset game state
+    matchTimer.reset();
+    rosterManager.resetPlayingTimes();
+    
+    closeModals();
+    
+    // Refresh display
+    pitchRenderer.render();
+    renderStatsTable();
+    updateTimerUI();
+    renderEventsLog();
+
+    alert(`Match vs. ${opponent} saved successfully! Current game statistics have been reset.`);
+  });
+
+  DOM.btnSeasonTrigger.addEventListener('click', () => {
+    renderSeasonStats();
+    renderMatchHistory();
+    DOM.seasonModal.classList.add('modal-active');
+  });
+
+  DOM.closeSeasonModal.addEventListener('click', closeModals);
+  DOM.closeDetailsModal.addEventListener('click', () => {
+    DOM.matchDetailsModal.classList.remove('modal-active');
+  });
+
+  // Handle Season Modal Tabs
+  DOM.tabSeasonStats.addEventListener('click', () => {
+    DOM.tabSeasonStats.classList.add('active');
+    DOM.tabMatchHistory.classList.remove('active');
+    DOM.tabContentStats.classList.add('active-content');
+    DOM.tabContentHistory.classList.remove('active-content');
+  });
+
+  DOM.tabMatchHistory.addEventListener('click', () => {
+    DOM.tabMatchHistory.classList.add('active');
+    DOM.tabSeasonStats.classList.remove('active');
+    DOM.tabContentHistory.classList.add('active-content');
+    DOM.tabContentStats.classList.remove('active-content');
   });
 
   // Initialize display

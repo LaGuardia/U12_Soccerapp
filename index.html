@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soccer Game Day Roster & Position Manager</title>
-  <meta name="description" content="A touch-friendly game day roster, tactical positions and equal-playtime manager for soccer coaches.">
+  <meta name="description"
+    content="A touch-friendly game day roster, tactical positions and equal-playtime manager for soccer coaches.">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
   <div class="app-container">
-    
+
     <!-- LEFT SIDEBAR: MATCH CONTROLS & EVENT LOGS -->
     <aside class="sidebar">
-      
+
       <!-- Logo / Title -->
       <header class="panel" style="padding: 15px 20px;">
-        <h1 id="app-title">📋 12U Coach Assistant</h1>
-        <p style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px;">Roster & equal-playtime tracker</p>
+        <h1 id="app-title">📋 12U PHMSA Boys Soccer Coach Assistant</h1>
+        <p style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px;">Roster & equal-playtime tracker
+        </p>
       </header>
 
       <!-- Period Tracker Box -->
@@ -27,12 +31,14 @@
           <div id="period-display" class="timer-display" style="font-size: 1.8rem; padding: 5px 0;">Quarter 1/4</div>
         </div>
         <div class="timer-controls">
-          <button id="btn-advance-period" class="btn btn-primary" style="width: 100%;" title="End current period and accrue minutes for field players">
+          <button id="btn-advance-period" class="btn btn-primary" style="width: 100%;"
+            title="End current period and accrue minutes for field players">
             <span>➡️</span> End Period & Accrue Time
           </button>
         </div>
         <div style="margin-top: 8px;">
-          <button id="btn-reset-clock" class="btn btn-secondary small-btn" style="width: 100%;" title="Reset match periods and play statistics">
+          <button id="btn-reset-clock" class="btn btn-secondary small-btn" style="width: 100%;"
+            title="Reset match periods and play statistics">
             <span>↺</span> Reset Match
           </button>
         </div>
@@ -60,7 +66,7 @@
           </ul>
         </div>
       </section>
-      
+
     </aside>
 
     <!-- CENTER AREA: SOCCER PITCH FIELD -->
@@ -71,7 +77,7 @@
           Bench All ✕
         </button>
       </div>
-      
+
       <!-- Visual Field Viewport -->
       <div class="pitch-viewport">
         <!-- SVG soccer field markings overlay -->
@@ -85,7 +91,8 @@
     <aside class="sidebar">
 
       <!-- Bench Drop Zone -->
-      <section class="panel" style="max-height: 350px; display: flex; flex-direction: column;" aria-labelledby="bench-title">
+      <section class="panel" style="max-height: 350px; display: flex; flex-direction: column;"
+        aria-labelledby="bench-title">
         <div class="panel-header">
           <h2 id="bench-title" class="panel-title">👥 Bench / Substitutes</h2>
           <span style="font-size: 0.72rem; color: var(--text-muted);">Drag players from here</span>
@@ -126,13 +133,18 @@
       <section class="panel" style="padding: 12px 20px;" aria-labelledby="settings-title">
         <h2 id="settings-title" class="panel-title">🔧 Admin Settings</h2>
         <div class="settings-actions">
-          <button id="btn-match-settings-trigger" class="btn btn-secondary small-btn" title="Configure periods and minutes">⏱ Period Config</button>
-          <button id="btn-reset-stats" class="btn btn-secondary small-btn" title="Reset play time tracker only">Reset Playtimes</button>
-          <button id="btn-export-roster" class="btn btn-secondary small-btn" title="Download backup of current roster">Backup Roster</button>
-          <button id="btn-import-roster" class="btn btn-secondary small-btn" title="Import a saved roster JSON file">Restore Roster</button>
+          <button id="btn-match-settings-trigger" class="btn btn-secondary small-btn"
+            title="Configure periods and minutes">⏱ Period Config</button>
+          <button id="btn-reset-stats" class="btn btn-secondary small-btn" title="Reset play time tracker only">Reset
+            Playtimes</button>
+          <button id="btn-export-roster" class="btn btn-secondary small-btn"
+            title="Download backup of current roster">Backup Roster</button>
+          <button id="btn-import-roster" class="btn btn-secondary small-btn"
+            title="Import a saved roster JSON file">Restore Roster</button>
         </div>
         <div style="margin-top: 8px; text-align: center;">
-          <button id="btn-reset-defaults" class="btn btn-danger small-btn" style="width: 100%; opacity: 0.6;" title="Reset database back to the 12 original players">
+          <button id="btn-reset-defaults" class="btn btn-danger small-btn" style="width: 100%; opacity: 0.6;"
+            title="Reset database back to the 12 original players">
             Reset Database to Demo Defaults
           </button>
         </div>
@@ -160,7 +172,8 @@
         </div>
         <div class="form-group">
           <label for="add-player-number">Jersey Number</label>
-          <input type="number" id="add-player-number" class="form-input" min="0" max="99" placeholder="e.g. 10" required>
+          <input type="number" id="add-player-number" class="form-input" min="0" max="99" placeholder="e.g. 10"
+            required>
         </div>
         <div class="form-group">
           <label for="add-player-pos">Preferred Playing Zone</label>
@@ -217,7 +230,8 @@
   </div>
 
   <!-- Match Period Settings Modal -->
-  <div id="match-settings-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+  <div id="match-settings-modal" class="modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="settings-modal-title">
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="settings-modal-title" class="modal-title">Match Time Settings</h3>
@@ -245,4 +259,5 @@
   <!-- Main Application Logic Bundle -->
   <script type="module" src="js/app.js"></script>
 </body>
+
 </html>

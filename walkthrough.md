@@ -91,6 +91,12 @@ A live, timestamped log in the left sidebar records:
 - Roster additions, edits, and removals
 - Entries tagged with the current period (Q1, Q2, H1, etc.) and wall-clock time
 
+### 8. Season History & Match Archiving
+A built-in archive system tracking statistics over a full season:
+- **Save Completed Matches**: Close and archive game rosters, final scores, and events logs under a unique ID.
+- **Season Dashboard**: Visual cumulative stats including appearance counts, total playing minutes, average playtime per game, and season-wide equal playtime percentages.
+- **Detailed Archives**: Chronological list of past games with options to inspect player-by-player minutes and log details, or delete matches from database.
+
 ---
 
 ## 🐛 Bugs Fixed
@@ -118,7 +124,8 @@ U12_Soccerapp/
     ├── roster.js       # RosterManager: player CRUD, localStorage, position syncing
     ├── timer.js        # MatchTimer (period manager): period tracking, playtime accrual, event logging
     ├── dragdrop.js     # DragDropController: Pointer Event drag-and-drop, swap logic, logging
-    └── pitch.js        # PitchRenderer: SVG field, position slots, player badge creation
+    ├── pitch.js        # PitchRenderer: SVG field, position slots, player badge creation
+    └── season.js       # SeasonManager: archives games and aggregates season-long playtime stats
 ```
 
 ---
